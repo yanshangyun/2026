@@ -1,0 +1,96 @@
+<!-- 2026 New Year's Resolutions -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2026 New Year's Resolution</title>
+    <script src="https://unpkg.com/typeit@8.7.1/dist/index.umd.js"></script>
+    <style>
+        body{
+            margin:0;
+            padding:0;
+        }
+
+        a{
+            color:black;
+            text-decoration:none;
+        }
+
+        a:hover{
+            text-decoration:underline;
+        }
+
+        .container{
+            width:100vw;
+            height:100vh;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            flex-direction:column;
+        }
+
+        .text{
+            text-align:center;
+            padding:50px;
+        }
+
+        .button-wrapper{
+            position:fixed;
+            bottom:20px;
+            display:flex;
+            flex-direction:row;
+            gap:10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="text">
+            <p>In 2026,&nbsp;<span id="typewriter"></span></p>
+        </div>
+        <div class="button-wrapper">
+            <button id="reroll">random</button>
+            <a href="https:/are.na/ryan-yan/2026-new-year-s-resolutions" target="_blank"><button>add yours</button></a>
+        </div>
+    </div>
+    <script>
+        let channelData;
+        let typeItInstance;
+
+        fetch("https://api.are.na/v3/channels/2026-new-year-s-resolutions/contents")
+        .then(res => res.json())
+        .then(channel => {
+            channelData = channel.data;
+            loadResolution();
+        });
+
+        function loadResolution(){
+            const channelLength = channelData.length;
+            const randomBlock = Math.floor(Math.random() * channelLength);
+
+            let resolutionText = channelData[randomBlock].content.plain;
+            let formattedResolution = resolutionText.replace(/my/gi, 'their');
+            const userText = channelData[randomBlock].user.name;
+            const userSlug = channelData[randomBlock].user.slug;
+
+            const fullText = `<a href="https://are.na/${userSlug}" target="_blank">${userText}</a> wants to ${formattedResolution}.`;
+            
+            if(typeItInstance){
+                typeItInstance.reset();
+            }
+            
+            typeItInstance = new TypeIt("#typewriter", {
+                strings:fullText,
+                speed:50,
+                waitUntilVisible:false,
+                cursor:false
+            }).go();
+        }
+
+        document.getElementById('reroll').addEventListener('click', () => {
+            loadResolution();
+        });
+    </script>
+</body>
+</html>
