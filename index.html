@@ -4,12 +4,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2026 New Year's Resolution</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <title>2026 New Year's Resolutions</title>
     <script src="https://unpkg.com/typeit@8.7.1/dist/index.umd.js"></script>
     <style>
         body{
             margin:0;
             padding:0;
+            color:black;
+            font-size:20px;
         }
 
         a{
@@ -19,6 +22,10 @@
 
         a:hover{
             text-decoration:underline;
+        }
+
+        ::selection{
+            background-color:rgb(233, 233, 233);
         }
 
         .container{
@@ -42,6 +49,28 @@
             flex-direction:row;
             gap:10px;
         }
+
+        button{
+            font-family:arial;
+            background-color:rgb(233, 233, 233);
+            border:0;
+            padding:2px 5px;
+            cursor:pointer;
+        }
+
+        button a:hover{
+            text-decoration:none;
+        }
+
+        @media only screen and (max-width:600px){
+            body{
+                font-size:30px;
+            }
+
+            button{
+                font-size:20px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -50,8 +79,8 @@
             <p>In 2026,&nbsp;<span id="typewriter"></span></p>
         </div>
         <div class="button-wrapper">
-            <button id="reroll">random</button>
-            <a href="https://are.na/ryan-yan/2026-new-year-s-resolutions" target="_blank"><button>add yours</button></a>
+            <button id="randomize">random</button>
+            <button><a href="https://are.na/ryan-yan/2026-new-year-s-resolutions" target="_blank" style="color:blue">add yours</a></button>
         </div>
     </div>
     <script>
@@ -66,29 +95,50 @@
         });
 
         function loadResolution(){
+            if(typeItInstance){
+                typeItInstance.destroy();
+            }
+
+            document.getElementById('typewriter').textContent = '';
+
             const channelLength = channelData.length;
             const randomBlock = Math.floor(Math.random() * channelLength);
 
+            console.log(randomBlock);
+
             let resolutionText = channelData[randomBlock].content.plain;
-            let formattedResolution = resolutionText.replace(/my/gi, 'their');
+            
+            function formatResolution(text){
+                let formatted = text.replace(/my/gi, 'their').replace(/\bi\b/gi, 'they');
+                
+                const firstWordMatch = formatted.match(/^\s*(\S+)/);
+                
+                if (firstWordMatch){
+                    const firstWord = firstWordMatch[1];
+                    const isAllCaps = firstWord === firstWord.toUpperCase() && /[A-Z]/.test(firstWord);
+                    if (firstWord[0] === firstWord[0].toUpperCase() && !isAllCaps) {
+                        formatted = formatted.replace(/^\s*\S+/, firstWord[0].toLowerCase() + firstWord.slice(1));
+                    }
+                }
+                
+                return formatted;
+            }
+            
+            let formattedResolution = formatResolution(resolutionText);
             const userText = channelData[randomBlock].user.name;
             const userSlug = channelData[randomBlock].user.slug;
 
             const fullText = `<a href="https://are.na/${userSlug}" target="_blank">${userText}</a> wants to ${formattedResolution}.`;
-            
-            if(typeItInstance){
-                typeItInstance.reset();
-            }
-            
+                        
             typeItInstance = new TypeIt("#typewriter", {
                 strings:fullText,
-                speed:50,
-                waitUntilVisible:false,
+                speed:25,
+                waitUntilVisible:true,
                 cursor:false
             }).go();
         }
 
-        document.getElementById('reroll').addEventListener('click', () => {
+        document.getElementById('randomize').addEventListener('click', () => {
             loadResolution();
         });
     </script>
