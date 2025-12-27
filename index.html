@@ -137,8 +137,10 @@
                 for(let i = 0; i < text.length; i++){
                     const char = text[i];
                     
+                    const isContraction = char === "'" && i > 0 && i < text.length - 1 && /[a-z]/i.test(text[i-1]) && /[a-z]/i.test(text[i+1]);
+                    
                     //don't change any pronouns inside of quotes
-                    if((char === '"' || char === "'") && (quoteChar === null || quoteChar === char)){
+                    if((char === '"' || (char === "'" && !isContraction)) && (quoteChar === null || quoteChar === char)){
                         if(!insideQuotes){
                             //enter quotes
                             parts.push({text:currentPart, quoted:false});
@@ -170,12 +172,17 @@
                     //change first person pronouns to gender neutral third person
                     //this adjustment *usually* works with the site's sentence structure but not always (edge cases?)
                     return part.text
+                        .replace(/\bmy\b/gi, 'their')
+                        .replace(/\bme\b/gi, 'them')
+                        .replace(/\bmine\b/gi, 'theirs')
+                        .replace(/\bmyself\b/gi, 'themselves')
                         .replace(/\bi'm\b/gi, 'they\'re')
                         .replace(/\bi'll\b/gi, 'they\'ll')
                         .replace(/\bi've\b/gi, 'they\'ve')
                         .replace(/\bi'd\b/gi, 'they\'d')
-                        .replace(/\bmy\b/gi, 'their')
-                        .replace(/\bi\b/gi, 'they');
+                        .replace(/\bi am\b/gi, 'they are')
+                        .replace(/\bi was\b/gi, 'they were')
+                        .replace(/\bi\b(?![''])/gi, 'they');
                 }).join('');
                 
                 const firstWordMatch = formatted.match(/^\s*(\S+)/);
@@ -188,7 +195,7 @@
                     }
                 }
                 
-                //if no punctuation -> add period, otherwise keep original punctuation
+                //check if text ends with punctuation
                 const endsWithPunctuation = /[.?!\-]\s*$/.test(formatted);
                 if(!endsWithPunctuation){
                     formatted = formatted.trimEnd() + '.';
