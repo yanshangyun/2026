@@ -41,6 +41,7 @@
         .text{
             text-align:center;
             padding:50px;
+            cursor:default;
         }
 
         .button-wrapper{
@@ -58,11 +59,18 @@
             padding:2px 5px;
             cursor:pointer;
             color:black;
+            font-size:15px;
+        }
+
+        #randomize:disabled{
+            opacity:0.5;
+            cursor:not-allowed;
         }
 
         button a:hover{
             text-decoration:none;
         }
+        
 
         @media only screen and (max-width:600px){
             body{
@@ -111,13 +119,14 @@
         }
 
         function loadResolution(){
+            document.getElementById('randomize').disabled = true;
+
             if(typeItInstance){
                 typeItInstance.destroy();
             }
 
             document.getElementById('typewriter').textContent = '';
 
-            const channelLength = channelData.length;
             const currentBlock = shuffleIndex[currentIndex];
 
             currentIndex++;
@@ -208,13 +217,16 @@
             const userText = channelData[currentBlock].user.name;
             const userSlug = channelData[currentBlock].user.slug;
 
-            const fullText = `<a href="https://are.na/${userSlug}" target="_blank">${userText}</a> wants to ${formattedResolution}`;
+            const fullText = `<a href="https://are.na/${userSlug}" target="_blank">${userText}</a> <span id="desire">wants to</span> ${formattedResolution}`;
                         
             typeItInstance = new TypeIt("#typewriter", {
                 strings:fullText,
                 speed:25,
                 waitUntilVisible:true,
-                cursor:false
+                cursor:false,
+                afterComplete:() => {
+                    document.getElementById('randomize').disabled = false;
+                }
             }).go();
 
             console.log(`${currentBlock}. ${resolutionText}`);
@@ -222,6 +234,18 @@
 
         document.getElementById('randomize').addEventListener('click', () => {
             loadResolution();
+        });
+
+        document.addEventListener('mouseover', (e) => {
+            if(e.target.id === 'desire'){
+                e.target.textContent = 'will';
+            }
+        });
+
+        document.addEventListener('mouseout', (e) => {
+            if(e.target.id === 'desire'){
+                e.target.textContent = 'wants to';
+            }
         });
     </script>
 </body>
