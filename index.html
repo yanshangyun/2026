@@ -188,6 +188,12 @@
                     }
                 }
                 
+                //if no punctuation -> add period, otherwise keep original punctuation
+                const endsWithPunctuation = /[.?!\-]\s*$/.test(formatted);
+                if(!endsWithPunctuation){
+                    formatted = formatted.trimEnd() + '.';
+                }
+                
                 return formatted;
             }
             
@@ -195,7 +201,7 @@
             const userText = channelData[currentBlock].user.name;
             const userSlug = channelData[currentBlock].user.slug;
 
-            const fullText = `<a href="https://are.na/${userSlug}" target="_blank">${userText}</a> wants to ${formattedResolution}.`;
+            const fullText = `<a href="https://are.na/${userSlug}" target="_blank">${userText}</a> wants to ${formattedResolution}`;
                         
             typeItInstance = new TypeIt("#typewriter", {
                 strings:fullText,
