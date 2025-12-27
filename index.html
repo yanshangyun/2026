@@ -88,13 +88,27 @@
     <script>
         let channelData;
         let typeItInstance;
+        let shuffledIndex = [];
+        let currentIndex = 0;
 
         fetch("https://api.are.na/v3/channels/2026-new-year-s-resolutions/contents?per=100")
         .then(res => res.json())
         .then(channel => {
             channelData = channel.data;
+            shuffleIndex();
             loadResolution();
         });
+
+        function shuffleIndex(){
+            shuffleIndex = Array.from({length:channelData.length}, (_, i) => i);
+    
+            for(let i = shuffleIndex.length - 1; i > 0; i--){
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffleIndex[i], shuffleIndex[j]] = [shuffleIndex[j], shuffleIndex[i]];
+            }
+            
+            currentIndex = 0;
+        }
 
         function loadResolution(){
             if(typeItInstance){
@@ -104,11 +118,15 @@
             document.getElementById('typewriter').textContent = '';
 
             const channelLength = channelData.length;
-            const randomBlock = Math.floor(Math.random() * channelLength);
+            const currentBlock = shuffleIndex[currentIndex];
 
-            console.log(randomBlock);
+            currentIndex++;
 
-            let resolutionText = channelData[randomBlock].content.plain;
+            if(currentIndex >= shuffleIndex.length){
+                shuffleIndices();
+            }
+
+            let resolutionText = channelData[currentBlock].content.plain;
             
             function formatResolution(text){
                 const parts = [];
@@ -119,6 +137,7 @@
                 for(let i = 0; i < text.length; i++){
                     const char = text[i];
                     
+                    //don't change any pronouns inside of quotes
                     if((char === '"' || char === "'") && (quoteChar === null || quoteChar === char)){
                         if(!insideQuotes){
                             //enter quotes
@@ -148,6 +167,8 @@
                         return part.text;
                     }
                     
+                    //change first person pronouns to gender neutral third person
+                    //this adjustment *usually* works with the site's sentence structure but not always (edge cases?)
                     return part.text
                         .replace(/\bi'm\b/gi, 'they\'re')
                         .replace(/\bi'll\b/gi, 'they\'ll')
@@ -171,8 +192,8 @@
             }
             
             let formattedResolution = formatResolution(resolutionText);
-            const userText = channelData[randomBlock].user.name;
-            const userSlug = channelData[randomBlock].user.slug;
+            const userText = channelData[currentBlock].user.name;
+            const userSlug = channelData[currentBlock].user.slug;
 
             const fullText = `<a href="https://are.na/${userSlug}" target="_blank">${userText}</a> wants to ${formattedResolution}.`;
                         
@@ -182,6 +203,8 @@
                 waitUntilVisible:true,
                 cursor:false
             }).go();
+
+            console.log(`${currentBlock}. ${resolutionText}`);
         }
 
         document.getElementById('randomize').addEventListener('click', () => {
