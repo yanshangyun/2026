@@ -89,7 +89,7 @@
         let channelData;
         let typeItInstance;
 
-        fetch("https://api.are.na/v3/channels/2026-new-year-s-resolutions/contents")
+        fetch("https://api.are.na/v3/channels/2026-new-year-s-resolutions/contents?per=100")
         .then(res => res.json())
         .then(channel => {
             channelData = channel.data;
@@ -111,14 +111,58 @@
             let resolutionText = channelData[randomBlock].content.plain;
             
             function formatResolution(text){
-                let formatted = text.replace(/my/gi, 'their').replace(/\bi\b/gi, 'they');
+                const parts = [];
+                let currentPart = '';
+                let insideQuotes = false;
+                let quoteChar = null;
+                
+                for(let i = 0; i < text.length; i++){
+                    const char = text[i];
+                    
+                    if((char === '"' || char === "'") && (quoteChar === null || quoteChar === char)){
+                        if(!insideQuotes){
+                            //enter quotes
+                            parts.push({text:currentPart, quoted:false});
+                            currentPart = char;
+                            insideQuotes = true;
+                            quoteChar = char;
+                        }else{
+                            //exit quotes
+                            currentPart += char;
+                            parts.push({text:currentPart, quoted:true});
+                            currentPart = '';
+                            insideQuotes = false;
+                            quoteChar = null;
+                        }
+                    }else{
+                        currentPart += char;
+                    }
+                }
+                
+                if(currentPart){
+                    parts.push({text:currentPart, quoted:insideQuotes});
+                }
+                
+                let formatted = parts.map(part => {
+                    if(part.quoted){
+                        return part.text;
+                    }
+                    
+                    return part.text
+                        .replace(/\bi'm\b/gi, 'they\'re')
+                        .replace(/\bi'll\b/gi, 'they\'ll')
+                        .replace(/\bi've\b/gi, 'they\'ve')
+                        .replace(/\bi'd\b/gi, 'they\'d')
+                        .replace(/\bmy\b/gi, 'their')
+                        .replace(/\bi\b/gi, 'they');
+                }).join('');
                 
                 const firstWordMatch = formatted.match(/^\s*(\S+)/);
                 
-                if (firstWordMatch){
+                if(firstWordMatch){
                     const firstWord = firstWordMatch[1];
                     const isAllCaps = firstWord === firstWord.toUpperCase() && /[A-Z]/.test(firstWord);
-                    if (firstWord[0] === firstWord[0].toUpperCase() && !isAllCaps) {
+                    if(firstWord[0] === firstWord[0].toUpperCase() && !isAllCaps){
                         formatted = formatted.replace(/^\s*\S+/, firstWord[0].toLowerCase() + firstWord.slice(1));
                     }
                 }
