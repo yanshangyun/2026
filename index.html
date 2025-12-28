@@ -12,6 +12,7 @@
             margin:0;
             padding:0;
             color:black;
+            background-color:white;
             font-size:20px;
             overflow:hidden;
         }
@@ -42,6 +43,7 @@
             text-align:center;
             padding:50px;
             cursor:default;
+            max-width:600px;
         }
 
         .button-wrapper{
@@ -67,6 +69,10 @@
             cursor:not-allowed;
         }
 
+        button a{
+            color:blue;
+        }
+
         button a:hover{
             text-decoration:none;
         }
@@ -81,6 +87,30 @@
                 font-size:20px;
             }
         }
+
+        @media (prefers-color-scheme: dark){
+            body{
+                background-color:black;
+                color:white;
+            }
+
+            ::selection{
+                background-color:rgb(73, 73, 73);
+            }
+
+            a{
+                color:white;
+            }
+
+            button{
+                background-color:rgb(73, 73, 73);
+                color:white;
+            }
+
+            button a{
+                color:rgb(69, 171, 255);
+            }
+        }
     </style>
 </head>
 <body>
@@ -90,10 +120,12 @@
         </div>
         <div class="button-wrapper">
             <button id="randomize">random</button>
-            <button><a href="https://are.na/ryan-yan/2026-new-year-s-resolutions" target="_blank" style="color:blue">add yours</a></button>
+            <button><a href="https://are.na/ryan-yan/2026-new-year-s-resolutions" target="_blank">add yours</a></button>
         </div>
     </div>
     <script>
+        console.log(".·:*¨ 2026 New Year's Resolutions ¨*:·.");
+
         let channelData;
         let typeItInstance;
         let shuffledIndex = [];
