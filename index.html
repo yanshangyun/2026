@@ -99,20 +99,46 @@
         let shuffledIndex = [];
         let currentIndex = 0;
 
-        fetch("https://api.are.na/v3/channels/2026-new-year-s-resolutions/contents?per=100")
-        .then(res => res.json())
-        .then(channel => {
-            channelData = channel.data;
-            shuffleIndex();
-            loadResolution();
-        });
+        async function fetchAll(){
+            try{
+                const firstRes = await fetch(`https://api.are.na/v3/channels/2026-new-year-s-resolutions/contents?per=100&page=1`);
+                const firstData = await firstRes.json();
+                
+                const totalPages = firstData.meta.total_pages;
+                const allBlocks = [firstData.data];
+                
+                if(totalPages > 1){
+                    const fetchPromises = [];
+                    
+                    for(let page = 2; page <= totalPages; page++){
+                        fetchPromises.push(
+                            fetch(`https://api.are.na/v3/channels/2026-new-year-s-resolutions/contents?per=100&page=${page}`)
+                            .then(res => res.json())
+                            .then(data => data.data)
+                        );
+                    }
+                    
+                    const remainingPages = await Promise.all(fetchPromises);
+                    allBlocks.push(...remainingPages);
+                }
+                
+                channelData = allBlocks.flat();
+                shuffleIndex();
+                loadResolution();
+
+            }catch(error){
+                console.error('error: ',error);
+            }
+        }
+
+        fetchAll();
 
         function shuffleIndex(){
-            shuffleIndex = Array.from({length:channelData.length}, (_, i) => i);
-    
-            for(let i = shuffleIndex.length - 1; i > 0; i--){
+            shuffledIndex = Array.from({length:channelData.length}, (_, i) => i);
+
+            for(let i = shuffledIndex.length - 1; i > 0; i--){
                 const j = Math.floor(Math.random() * (i + 1));
-                [shuffleIndex[i], shuffleIndex[j]] = [shuffleIndex[j], shuffleIndex[i]];
+                [shuffledIndex[i], shuffledIndex[j]] = [shuffledIndex[j], shuffledIndex[i]];
             }
             
             currentIndex = 0;
@@ -127,12 +153,12 @@
 
             document.getElementById('typewriter').textContent = '';
 
-            const currentBlock = shuffleIndex[currentIndex];
+            const currentBlock = shuffledIndex[currentIndex];
 
             currentIndex++;
 
-            if(currentIndex >= shuffleIndex.length){
-                shuffleIndices();
+            if(currentIndex >= shuffledIndex.length){
+                shuffleIndex();
             }
 
             let resolutionText = channelData[currentBlock].content.plain;
